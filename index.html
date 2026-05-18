@@ -14,18 +14,7 @@
 <script>
 // ── INLINE MANIFEST (PWA) ──────────────────────────────────
 
-  // Apple touch icon
-  const appleIcon = makeIcon(180);
-  const link = document.createElement('link');
-  link.rel = 'apple-touch-icon';
-  link.href = appleIcon;
-  document.head.appendChild(link);
 
-  // Favicon
-  const favicon = document.createElement('link');
-  favicon.rel = 'icon';
-  favicon.href = makeIcon(64);
-  document.head.appendChild(favicon);
 
   // Service Worker
  if ('serviceWorker' in navigator) {
