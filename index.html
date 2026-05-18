@@ -7,7 +7,102 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Studio G">
+<meta name="description" content="Controle financeiro e de alunas do Studio G Pilates">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="#" id="manifest-placeholder">
 <title>Studio G</title>
+<script>
+// ── INLINE MANIFEST (PWA) ──────────────────────────────────
+const manifest = {
+  name: "Studio G",
+  short_name: "Studio G",
+  description: "Controle financeiro e de alunas do Studio G Pilates",
+  start_url: "./",
+  display: "standalone",
+  background_color: "#1A1014",
+  theme_color: "#E8192C",
+  orientation: "portrait",
+  lang: "pt-BR",
+  icons: [
+    { src: makeIcon(192), sizes: "192x192", type: "image/png", purpose: "any maskable" },
+    { src: makeIcon(512), sizes: "512x512", type: "image/png", purpose: "any maskable" }
+  ],
+  categories: ["business", "finance"],
+  screenshots: []
+};
+
+function makeIcon(size) {
+  const canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  // fundo preto
+  ctx.fillStyle = '#1A1014';
+  ctx.fillRect(0, 0, size, size);
+  // círculo vermelho
+  ctx.fillStyle = '#E8192C';
+  ctx.beginPath();
+  ctx.arc(size/2, size/2, size*0.42, 0, Math.PI*2);
+  ctx.fill();
+  // letra G branca
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = `bold ${size*0.52}px Georgia, serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('g', size/2 + size*0.02, size/2 + size*0.04);
+  return canvas.toDataURL('image/png');
+}
+
+// Injeta manifest dinamicamente
+window.addEventListener('DOMContentLoaded', () => {
+  const icons = [
+    { src: makeIcon(192), sizes: "192x192", type: "image/png", purpose: "any maskable" },
+    { src: makeIcon(512), sizes: "512x512", type: "image/png", purpose: "any maskable" }
+  ];
+  const mObj = {...manifest, icons};
+  const blob = new Blob([JSON.stringify(mObj)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  document.getElementById('manifest-placeholder').href = url;
+
+  // Apple touch icon
+  const appleIcon = makeIcon(180);
+  const link = document.createElement('link');
+  link.rel = 'apple-touch-icon';
+  link.href = appleIcon;
+  document.head.appendChild(link);
+
+  // Favicon
+  const favicon = document.createElement('link');
+  favicon.rel = 'icon';
+  favicon.href = makeIcon(64);
+  document.head.appendChild(favicon);
+
+  // Service Worker
+  if('serviceWorker' in navigator) {
+    const swCode = `
+const CACHE = 'studiog-v1';
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/'])));
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys =>
+    Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))
+  ));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(r => r || fetch(e.request).catch(() =>
+      caches.match('/')
+    ))
+  );
+});`;
+    const swBlob = new Blob([swCode], {type:'text/javascript'});
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl).catch(()=>{});
+  }
+});
+</script>
 <style>
 :root {
   --red: #E8192C;
