@@ -119,8 +119,45 @@ const ALUNAS_INIT = [
 ];
 
 // ── STORAGE ─────────────────────────────────────────────────
+const REMOTE_STORAGE = {
+  enabled: false,
+  provider: 'firebase',
+  rootPath: 'studio_g',
+  firebaseConfig: {
+    apiKey: '',
+    authDomain: '',
+    databaseURL: '',
+    projectId: '',
+    storageBucket: '',
+    messagingSenderId: '',
+    appId: ''
+  }
+};
+
+function initRemoteStorage(){
+  if(!REMOTE_STORAGE.enabled) return;
+  if(typeof firebase === 'undefined'){ console.warn('Firebase SDK is not loaded. Remote storage disabled.'); return; }
+  try{
+    firebase.initializeApp(REMOTE_STORAGE.firebaseConfig);
+    REMOTE_STORAGE.db = firebase.database();
+  }catch(e){
+    console.warn('Remote storage initialization failed:', e);
+  }
+}
+
+async function remoteSave(k,v){
+  if(!REMOTE_STORAGE.enabled || !REMOTE_STORAGE.db) return;
+  try{
+    await REMOTE_STORAGE.db.ref(`${REMOTE_STORAGE.rootPath}/${k}`).set(v);
+  }catch(e){
+    console.warn('Remote save failed:', e);
+  }
+}
+
 function load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
-function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} if(REMOTE_STORAGE.enabled) remoteSave(k,v);}
+
+initRemoteStorage();
 
 let alunas = load('sg_alunas', ALUNAS_INIT);
 
