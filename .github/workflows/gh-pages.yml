@@ -6,11 +6,21 @@ on:
 
 jobs:
   deploy:
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          persist-credentials: true
+
+      - name: Debug Git environment
+        run: |
+          git remote -v
+          git branch --show-current
+          git status --short
 
       - name: Prepare published folder and write deployed commit SHA
         run: |
