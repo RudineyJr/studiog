@@ -12,8 +12,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Write deployed commit SHA
-        run: echo "${{ github.sha }}" > ./www/deployed_commit.txt
+      - name: Prepare published folder and write deployed commit SHA
+        run: |
+          mkdir -p ./www
+          echo "${{ github.sha }}" > ./www/deployed_commit.txt
 
       - name: Deploy `www/` to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
