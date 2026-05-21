@@ -41,3 +41,5 @@ npx cap open ios
 Notes:
 - If you prefer to publish a different folder (e.g., `studiog/`), update the `publish_dir` in the workflow.
 - You can also deploy manually with the `gh-pages` npm package or GitHub Pages settings (use `docs/` folder or `gh-pages` branch).
+
+Deploy trigger: bump to prompt GitHub Actions deploy
