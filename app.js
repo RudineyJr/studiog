@@ -1,4 +1,3 @@
-<script>
 const ML = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MS = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 
@@ -235,12 +234,19 @@ function uid(){return '_'+Math.random().toString(36).slice(2);}
 function lbl(m,a){return ML[m]+' '+a;}
 
 // ── NAV ──────────────────────────────────────────────────────
-const navBtns=document.querySelectorAll('.nav-btn');
+let navBtns = [];
+function initNav(){
+  navBtns = Array.from(document.querySelectorAll('.nav-btn'));
+}
+window.addEventListener('DOMContentLoaded', initNav);
 function goScreen(id,idx){
+  if(navBtns.length===0) initNav();
+  const target = document.getElementById('screen-'+id);
+  if(!target) return;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   navBtns.forEach(b=>b.classList.remove('active'));
-  document.getElementById('screen-'+id).classList.add('active');
-  navBtns[idx].classList.add('active');
+  target.classList.add('active');
+  if(navBtns[idx]) navBtns[idx].classList.add('active');
   state.screen=id;
   if(id==='home')renderHome();
   if(id==='alunas')renderAlunas();
@@ -264,6 +270,7 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
 function openAdd(){
   const s=state.screen;
+  if(navBtns.length===0) initNav();
   if(s==='alunas'){openModal('modal-aluna');return;}
   if(s==='financeiro'){
     document.getElementById('g-mes').value=state.fin.mes;
@@ -660,7 +667,6 @@ function renderAniv(){
 
 // ── INIT ─────────────────────────────────────────────────────
 renderHome();
-</script>
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
