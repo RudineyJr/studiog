@@ -1,0 +1,9 @@
+{
+  "appId": "com.rudiney.studiog",
+  "appName": "Studio G",
+  "webDir": "www",
+  "server": {
+    "url": "https://RudineyJr.github.io/studiog/"
+  },
+  "bundledWebRuntime": false
+}
