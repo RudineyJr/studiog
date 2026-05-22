@@ -299,6 +299,7 @@ let state = {
   aniv:{mes:hoje.getMonth(),ano:hoje.getFullYear()},
   screen:'home'
 };
+let editingAlunaId = null;
 
 // ── HELPERS ──────────────────────────────────────────────────
 function fmt(v){return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});}
@@ -339,12 +340,29 @@ function chMonth(ctx,d){
 
 // ── MODALS ───────────────────────────────────────────────────
 function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  if(id==='modal-aluna'){
+    editingAlunaId = null;
+    const title = document.querySelector('#modal-aluna .modal-title');
+    if(title) title.textContent = 'Cadastrar aluna';
+    const button = document.querySelector('#modal-aluna .btn-red');
+    if(button) button.textContent = 'Cadastrar aluna';
+  }
+}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
 function openAdd(){
   const s=state.screen;
   if(navBtns.length===0) initNav();
-  if(s==='alunas'){openModal('modal-aluna');return;}
+  if(s==='alunas'){ 
+    editingAlunaId = null;
+    const title = document.querySelector('#modal-aluna .modal-title');
+    if(title) title.textContent = 'Cadastrar aluna';
+    const button = document.querySelector('#modal-aluna .btn-red');
+    if(button) button.textContent = 'Cadastrar aluna';
+    openModal('modal-aluna');
+    return;
+  }
   if(s==='financeiro'){
     document.getElementById('g-mes').value=state.fin.mes;
     document.getElementById('g-ano').value=state.fin.ano;
@@ -552,6 +570,7 @@ function showAluna(id){
         <div class="row-right"><div class="row-val green">${fmt(p.valor)}</div></div>
       </div>`).join('')}
     </div>`:''}
+    <button onclick="editAluna('${a.id}')" class="btn-red" style="margin-right:8px;">Editar aluna</button>
     <button onclick="if(confirm('Remover ${a.nome.replace(/'/g,"\\'")}?')){removeAluna('${a.id}');closeModal('modal-det');}" class="btn-danger">Remover aluna</button>
   `;
   openModal('modal-det');
@@ -561,6 +580,26 @@ function removeAluna(id){alunas=alunas.filter(a=>a.id!==id);save('sg_alunas',alu
 
 function toggleDia(btn) { btn.classList.toggle('sel'); }
 
+function editAluna(id){
+  closeModal('modal-det');
+  const a=alunas.find(x=>x.id===id);if(!a)return;
+  editingAlunaId = id;
+  document.getElementById('a-nome').value = a.nome;
+  document.getElementById('a-valor').value = a.valor;
+  document.getElementById('a-dia').value = a.dia;
+  document.getElementById('a-aniv').value = a.aniv || '';
+  document.getElementById('a-horario').value = a.horario || '';
+  document.querySelectorAll('#dias-semana-picker .dia-pill').forEach(b=>{
+    const dia = parseInt(b.dataset.dia);
+    b.classList.toggle('sel', Array.isArray(a.dias) && a.dias.includes(dia));
+  });
+  const title = document.querySelector('#modal-aluna .modal-title');
+  if(title) title.textContent = 'Editar aluna';
+  const button = document.querySelector('#modal-aluna .btn-red');
+  if(button) button.textContent = 'Salvar alterações';
+  openModal('modal-aluna');
+}
+
 function saveAluna(){
   const nome=document.getElementById('a-nome').value.trim();
   const valor=parseFloat(document.getElementById('a-valor').value)||180;
@@ -569,7 +608,14 @@ function saveAluna(){
   const horario=document.getElementById('a-horario').value;
   const dias=[...document.querySelectorAll('#dias-semana-picker .dia-pill.sel')].map(b=>parseInt(b.dataset.dia));
   if(!nome)return alert('Informe o nome');
-  alunas.push({id:uid(),nome,valor,dia,aniv,horario,dias});
+  if(editingAlunaId){
+    const index = alunas.findIndex(a=>a.id===editingAlunaId);
+    if(index !== -1){
+      alunas[index] = {...alunas[index],nome,valor,dia,aniv,horario,dias};
+    }
+  } else {
+    alunas.push({id:uid(),nome,valor,dia,aniv,horario,dias});
+  }
   save('sg_alunas',alunas);
   closeModal('modal-aluna');
   ['a-nome','a-valor','a-dia','a-aniv'].forEach(id=>document.getElementById(id).value='');
