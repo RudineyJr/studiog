@@ -120,17 +120,18 @@ const ALUNAS_INIT = [
 
 // ── STORAGE ─────────────────────────────────────────────────
 const REMOTE_STORAGE = {
-  enabled: false,
+  enabled: true,
   provider: 'firebase',
   rootPath: 'studio_g',
   firebaseConfig: {
-    apiKey: '',
-    authDomain: '',
-    databaseURL: '',
-    projectId: '',
-    storageBucket: '',
-    messagingSenderId: '',
-    appId: ''
+    apiKey: "AIzaSyDxYsG4VRLV-syt9Vw09HLQxzmXyMZgi0Y",
+    authDomain: "studiog-74fe9.firebaseapp.com",
+    databaseURL: "https://studiog-74fe9-default-rtdb.firebaseio.com",
+    projectId: "studiog-74fe9",
+    storageBucket: "studiog-74fe9.firebasestorage.app",
+    messagingSenderId: "1071846455942",
+    appId: "1:1071846455942:web:81dff51658461155f52f07",
+    measurementId: "G-X7M57HPTJR"
   }
 };
 
