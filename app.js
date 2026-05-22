@@ -155,8 +155,43 @@ async function remoteSave(k,v){
   }
 }
 
+function saveLocal(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
-function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} if(REMOTE_STORAGE.enabled) remoteSave(k,v);}
+function save(k,v){saveLocal(k,v); if(REMOTE_STORAGE.enabled) remoteSave(k,v);}
+
+async function remoteLoad(k,d){
+  if(!REMOTE_STORAGE.enabled || !REMOTE_STORAGE.db) return {exists:false,value:d};
+  try{
+    const snap = await REMOTE_STORAGE.db.ref(`${REMOTE_STORAGE.rootPath}/${k}`).once('value');
+    if(!snap.exists()) return {exists:false,value:d};
+    let value = snap.val();
+    if(value && typeof value === 'object' && !Array.isArray(value)){
+      const keys = Object.keys(value);
+      if(keys.length && keys.every(key=>/^\d+$/.test(key))) {
+        value = keys.sort((a,b)=>Number(a)-Number(b)).map(key=>value[key]);
+      }
+    }
+    return {exists:true,value};
+  }catch(e){
+    console.warn('Remote load failed:', e);
+    return {exists:false,value:d};
+  }
+}
+
+async function loadRemoteState(){
+  if(!REMOTE_STORAGE.enabled || !REMOTE_STORAGE.db) return;
+  const [alunasData, pagamentosData, gastosData, presencasData] = await Promise.all([
+    remoteLoad('sg_alunas', alunas),
+    remoteLoad('sg_pags', pagamentos),
+    remoteLoad('sg_gastos', gastos),
+    remoteLoad('sg_presencas', presencas)
+  ]);
+
+  if(alunasData.exists){ alunas = alunasData.value; saveLocal('sg_alunas', alunas); }
+  if(pagamentosData.exists){ pagamentos = pagamentosData.value; saveLocal('sg_pags', pagamentos); }
+  if(gastosData.exists){ gastos = gastosData.value; saveLocal('sg_gastos', gastos); }
+  if(presencasData.exists){ presencas = presencasData.value; saveLocal('sg_presencas', presencas); }
+}
 
 initRemoteStorage();
 
@@ -704,13 +739,7 @@ function renderAniv(){
 }
 
 // ── INIT ─────────────────────────────────────────────────────
-renderHome();
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js");
-  });
-}
+loadRemoteState().then(()=>renderHome()).catch(()=>renderHome());
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
