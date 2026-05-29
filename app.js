@@ -29,65 +29,7 @@ function initRemoteStorage(){
   }
 }
 
-const AUTH = {
-  enabled: false,
-  provider: 'firebase'
-};
-let authInitialized = false;
 
-function initAuth(){
-  if(!AUTH.enabled) return;
-  if(typeof firebase === 'undefined'){ console.warn('Firebase SDK is not loaded. Auth disabled.'); return; }
-  try{ firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); }catch(e){}
-  firebase.auth().onAuthStateChanged(async user=>{
-    if(user){
-      document.getElementById('login-overlay')?.classList.remove('open');
-      document.getElementById('app').style.filter = '';
-      document.getElementById('logout-btn')?.style.setProperty('display','inline-flex');
-      // Sempre puxa dados frescos do Firebase ao autenticar (login ou reabertura do app)
-      authInitialized = true;
-      await loadRemoteState().catch(e=>console.warn('loadRemoteState falhou:', e));
-      renderHome();
-    } else {
-      authInitialized = false;
-      document.getElementById('logout-btn')?.style.setProperty('display','none');
-      document.getElementById('app').style.filter = 'blur(3px)';
-      document.getElementById('login-overlay')?.classList.add('open');
-    }
-  });
-}
-
-function setAuthError(message){
-  const el = document.getElementById('auth-error');
-  if(el) el.textContent = message || '';
-}
-
-async function login(){
-  const email = (document.getElementById('auth-email')?.value || '').trim();
-  const password = document.getElementById('auth-pass')?.value || '';
-  if(!email || !password){ return setAuthError('Preencha e-mail e senha.'); }
-  try{
-    await firebase.auth().signInWithEmailAndPassword(email,password);
-  }catch(e){
-    setAuthError(e.message || 'Falha ao entrar.');
-  }
-}
-
-async function signup(){
-  const email = (document.getElementById('auth-email')?.value || '').trim();
-  const password = document.getElementById('auth-pass')?.value || '';
-  if(!email || !password){ return setAuthError('Preencha e-mail e senha.'); }
-  try{
-    await firebase.auth().createUserWithEmailAndPassword(email,password);
-  }catch(e){
-    setAuthError(e.message || 'Não foi possível criar a conta.');
-  }
-}
-
-function logout(){
-  if(typeof firebase === 'undefined') return;
-  firebase.auth().signOut().catch(()=>{});
-}
 
 async function remoteSave(k,v){
   if(!REMOTE_STORAGE.enabled || !REMOTE_STORAGE.db) return;
@@ -658,11 +600,7 @@ function renderAniv(){
 // Aguarda DOM + SDKs do Firebase carregarem antes de inicializar
 window.addEventListener('DOMContentLoaded', () => {
   initRemoteStorage();
-  if(AUTH.enabled){
-    initAuth();
-  } else {
-    loadRemoteState().then(()=>renderHome()).catch(()=>renderHome());
-  }
+  loadRemoteState().then(()=>renderHome()).catch(()=>renderHome());
 });
 
 if ("serviceWorker" in navigator) {
