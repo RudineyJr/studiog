@@ -1,6 +1,123 @@
 const ML = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MS = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 
+// ── DADOS 2026 da planilha ──────────────────────────────────
+const PAGS_2026 = [
+  // JANEIRO
+  ...['Jamille Godinho','Raissa Beleboni','Doracy Carvalho','Eloyse Carvalho','Daniella Rodrigues','Itamara Moura','Josilena Moita','Leandro Ribeiro','Joelma Ribeiro','Maria Iêda Amaral','Sandra Rocha','Pérola Amorim','Lucilene Silva','Rosane Santos','Alba Maia','Sophia Neves','Sidney Lima','Izolda Omena','Larissa Sousa','Sofia Amorim','Savia Amorim','Walleska Trindade','Wilsiene Silva','Graça Rocha','Bianca Oliveira','Valderice Pereira','Lígia Rebelo','Maria de Sousa','Odilia Godinho','Anne Dias','Eloisa Aguiar','Carol Rayol','Izete Lima','Isaura Lima','Maria Eunice Lopes','Shirley Marinho','Helena Sato','Nerina Hayashida','Maria Sato','Joselma Maciel','Diva Lameira','Andreza Carvalho','Lindalva Castro','Camila Lameira','Pamela Garcia','Déborh Marinho','Elaine Vasconcelos'].map(n=>({nome:n,mes:0,ano:2026,valor:getValorAluna(n)})),
+  // FEVEREIRO
+  ...['Jamille Godinho','Josilena Moita','Leandro Ribeiro','Joelma Ribeiro','Daniella Rodrigues','Raissa Beleboni','Itamara Moura','Maria de Nazaré Castro','Livia Lopes','Sandra Rocha','Pérola Amorim','Sophia Neves','Larissa Sousa','Alba Maia','Rosane Santos','Odilia Godinho','Wilsiene Silva','Graça Rocha','Anne Dias','Shirley Marinho','Lígia Rebelo','Eloisa Aguiar','Izolda Omena','Maria Clara Bentes','Izete Lima','Maria José Oliveira','Isaura Lima','Sofia Amorim','Valderice Pereira','Savia Amorim','Pamela Garcia','Monica Godinho','Carol Rayol','Lidiane Silva','Helena Sato','Nerina Hayashida','Maria Sato','Camila Lameira','Regina Taketomi','Nice Barreto','Ariane Salgado','Andreza Carvalho','Déborh Marinho','Niviane Dolzane','Leomara Lobato','Joselma Maciel','Walleska Trindade','Rayene Nascimento','Lindalva Castro','Elaine Vasconcelos','Diva Lameira'].map(n=>({nome:n,mes:1,ano:2026,valor:getValorAluna(n)})),
+  // MARÇO
+  ...['Keice Azevedo','Daniella Rodrigues','Itamara Moura','Josilena Moita','Leandro Ribeiro','Joelma Ribeiro','Aldenilza','Raissa Beleboni','Sandra Rocha','Pérola Amorim','Livia Lopes','Sophia Neves','Rosane Santos','Eloisa Aguiar','Maria José Oliveira','Alba Maia','Larissa Sousa','Karynna Monteiro','Arnely Neves','Izolda Omena','Anne Dias','Elke Gonçalves','Anne Gonçalves','Odilia Godinho','Shirley Marinho','Milvaneth Cardoso','Maria de Nazaré Castro','Maria Clara Bentes','Emily Nascimento','Aila Maria Sousa','Dienny Frota','Izete Lima','Isaura Lima','Valderice Pereira','Ester Godinho','Laura Amancio','Nerina Hayashida','Eliene Costa','Leomara Lobato','Carol Rayol','Monica Godinho','Helena Sato','Pamela Garcia','Andreza Carvalho','Lidiane Silva','Rayene Nascimento','Nice Barreto','Ariane Salgado','Regina Taketomi','Niviane Dolzane','Joselma Maciel','Diva Lameira','Déborh Marinho','Walleska Trindade','Elaise Souza','Maria Iêda Amaral','Eloyse Carvalho','Doracy Carvalho','Vilma da Luz','Lindalva Castro','Camila Lameira','Maria de Sousa','Elaine Vasconcelos'].map(n=>({nome:n,mes:2,ano:2026,valor:getValorAluna(n)})),
+  // ABRIL
+  ...['Samara Oliveira','Aldenilza','Ilda Oliveira','Dilair Vieira','Daniella Rodrigues','Itamara Moura','Raissa Beleboni','Josilena Moita','Mira Pereira','Karini Pereira','Milvaneth Cardoso','Sandra Rocha','Maria Clara Bentes','Pérola Amorim','Márcia Malcher','Inaida Costa','Leandro Ribeiro','Joelma Ribeiro','Livia Lopes','Sophia Neves','Eloisa Aguiar','Graça Rocha','Izolda Omena','Helcimyria Amaral','Maria de Nazaré Castro','Alba Maia','Arnely Neves','Maria José Oliveira','Shirley Marinho','Odilia Godinho','Laiza Silva','Anne Dias','Ester Godinho','Eliene Costa','Emily Nascimento','Aila Maria Sousa','Izete Lima','Isaura Lima','Fernanda Bonfim','Valderice Pereira','Clara Amancio','July Godinho','Laura Amancio','Monica Godinho','Leomara Lobato','Karynna Monteiro','Nice Barreto','Helena Sato','Nerina Hayashida','Wilsiene Diniz','Ariane Salgado','Pamela Garcia','Vilma da Luz','Déborh Marinho','Regina Taketomi','Maria de Sousa','Maria Iêda Amaral','Elaise Souza','Rayene Nascimento','Walleska Trindade','Doracy Carvalho','Niviane Dolzane','Eloyse Carvalho','Elaine Vasconcelos','Lindalva Castro','Joselma Maciel'].map(n=>({nome:n,mes:3,ano:2026,valor:getValorAluna(n)})),
+  // MAIO
+  ...['Joice Mendonça','Maíra de Figueiredo','Jorge de Figueiredo','Márcia Barbosa','Andressa Pires','Emily Nascimento','Izete Lima','Isaura Lima','Ester Godinho','Eliene Costa','Irio Luiz Orth','Elen Orth','Luciane Budelon Albuquerque','Leomara Lobato','Wilsiene Diniz','Helena Sato','Nerina Hayashida','Antônia Rita','Valderice Pereira','July Godinho','Monica Godinho','Laura Amancio','Clara Amancio','Fernanda Bonfim','Déborh Marinho','Pamela Garcia','Bianca Lima','Ariane Salgado','Regina Taketomi','Vilma da Luz','Elaise Souza','Maria de Sousa','Walleska Trindade','Rayene Nascimento','Eloyse Carvalho','Doracy Carvalho','Niviane Dolzane','Lindalva Castro','Elaine Vasconcelos','Joselma Maciel'].map(n=>({nome:n,mes:4,ano:2026,valor:getValorAluna(n)})),
+];
+
+function getValorAluna(nome) {
+  const n = nome.trim().toLowerCase();
+  const especiais = {
+    'lindalva castro':200,'maria josé oliveira':250,'nerina hayashida':120,
+    'july godinho':120,'ester godinho':145,'odilia godinho':145,'jamille godinho':145,'rosane santos':145,
+    'valderice pereira':150,'anne dias':150,'monica godinho':150,'joelma ribeiro':150,
+    'leandro ribeiro':150,'aldenilza':150,'dilair vieira':150,'daniella rodrigues':150,
+    'itamara moura':150,'livia lopes':150,'eloisa aguiar':120,'shirley marinho':100,
+    'izete lima':170,'isaura lima':170,'elaine vasconcelos':170,'sandra rocha':170,
+    'maria de sousa':170,'milvaneth cardoso':180,'karynna monteiro':180,
+    'izolda omena':174,'anne gonçalves':174,'elaise souza':60,'nerina hayashida':100,
+    'sid':150,'camila lameira':150,'diva lameira':150,'sidney lima':150,
+    'maria eunice lopes':170,'lígia rebelo':180,'bianca oliveira':180,
+    'larissa sousa':180,'sofia amorim':180,'savia amorim':180,'wilsiene silva':180,
+    'keice azevedo':180,'lucilene silva':180,'dienny frota':180,'elke gonçalves':180,
+    'lidiane silva':180,'carol rayol':180,'andreza carvalho':180,'nice barreto':180,
+    'sophia neves':180,'maria iêda amaral':180,'ilda oliveira':180,'samara oliveira':180,
+    'mira pereira':180,'karini pereira':180,'márcia malcher':180,'inaida costa':180,
+    'laiza silva':180,'helcimyria amaral':180,'arnely neves':180,'maria clara bentes':180,
+    'raissa beleboni':180,'josilena moita':180,'alba maia':180,'graça rocha':180,
+    'shirley marinho':180,'milvaneth cardoso':180
+  };
+  return especiais[n] || 180;
+}
+
+// Alunas cadastradas
+const ALUNAS_INIT = [
+  {id:'a1',nome:'Joselma Maciel',valor:180,dia:1,aniv:'23/10'},
+  {id:'a2',nome:'Elaine Vasconcelos',valor:170,dia:1,aniv:'26/02'},
+  {id:'a3',nome:'Lindalva Castro',valor:200,dia:1,aniv:''},
+  {id:'a4',nome:'Doracy Carvalho',valor:180,dia:2,aniv:''},
+  {id:'a5',nome:'Eloyse Carvalho',valor:180,dia:2,aniv:'31/03'},
+  {id:'a6',nome:'Vilma da Luz',valor:180,dia:2,aniv:'29/09'},
+  {id:'a7',nome:'Nerina Hayashida',valor:100,dia:3,aniv:'17/06'},
+  {id:'a8',nome:'Niviane Dolzane',valor:180,dia:2,aniv:''},
+  {id:'a9',nome:'Rayene Nascimento',valor:180,dia:3,aniv:''},
+  {id:'a10',nome:'Déborh Marinho',valor:180,dia:5,aniv:'15/11'},
+  {id:'a11',nome:'Valderice Pereira',valor:150,dia:4,aniv:''},
+  {id:'a12',nome:'Maria de Sousa',valor:170,dia:3,aniv:'29/06'},
+  {id:'a13',nome:'Walleska Trindade',valor:180,dia:3,aniv:''},
+  {id:'a14',nome:'Bianca Lima',valor:180,dia:5,aniv:''},
+  {id:'a15',nome:'Helena Sato',valor:180,dia:5,aniv:'22/09'},
+  {id:'a16',nome:'Pamela Garcia',valor:180,dia:5,aniv:'25/12'},
+  {id:'a17',nome:'July Godinho',valor:120,dia:8,aniv:''},
+  {id:'a18',nome:'Ester Godinho',valor:145,dia:10,aniv:'31/07'},
+  {id:'a19',nome:'Regina Taketomi',valor:150,dia:5,aniv:''},
+  {id:'a20',nome:'Ariane Salgado',valor:180,dia:5,aniv:'23/10'},
+  {id:'a21',nome:'Antoni Rita de Sá',valor:180,dia:7,aniv:''},
+  {id:'a22',nome:'Monica Godinho',valor:150,dia:7,aniv:''},
+  {id:'a23',nome:'Wilsiene Diniz',valor:180,dia:6,aniv:''},
+  {id:'a24',nome:'Anne Dias',valor:150,dia:10,aniv:'31/10'},
+  {id:'a25',nome:'Leomara Lobato',valor:180,dia:9,aniv:'13/02'},
+  {id:'a26',nome:'Clara Amancio',valor:180,dia:9,aniv:''},
+  {id:'a27',nome:'Isaura Lima',valor:170,dia:12,aniv:'20/05'},
+  {id:'a28',nome:'Maria José Oliveira',valor:250,dia:12,aniv:'15/02'},
+  {id:'a29',nome:'Izete Lima',valor:170,dia:12,aniv:''},
+  {id:'a30',nome:'Fernanda Bonfim',valor:180,dia:9,aniv:''},
+  {id:'a31',nome:'Shirley Marinho',valor:180,dia:12,aniv:''},
+  {id:'a32',nome:'Laura Amancio',valor:180,dia:9,aniv:''},
+  {id:'a33',nome:'Odilia Godinho',valor:145,dia:15,aniv:''},
+  {id:'a34',nome:'Laiza Silva',valor:180,dia:14,aniv:'21/11'},
+  {id:'a35',nome:'Izolda Omena',valor:174,dia:15,aniv:'17/05'},
+  {id:'a36',nome:'Eliene Costa',valor:180,dia:9,aniv:'24/01'},
+  {id:'a37',nome:'Maria de Nazaré Castro',valor:180,dia:13,aniv:''},
+  {id:'a38',nome:'Graça Rocha',valor:180,dia:15,aniv:'28/04'},
+  {id:'a39',nome:'Alba Maia',valor:180,dia:20,aniv:'20/11'},
+  {id:'a40',nome:'Helcimyria Amaral',valor:180,dia:16,aniv:''},
+  {id:'a41',nome:'Rosane Santos',valor:145,dia:12,aniv:'31/03'},
+  {id:'a42',nome:'Arnely Neves',valor:180,dia:19,aniv:''},
+  {id:'a43',nome:'Livia Lopes',valor:180,dia:23,aniv:''},
+  {id:'a44',nome:'Joelma Ribeiro',valor:150,dia:23,aniv:''},
+  {id:'a45',nome:'Leandro Ribeiro',valor:150,dia:23,aniv:''},
+  {id:'a46',nome:'Pérola Amorim',valor:180,dia:24,aniv:'13/09'},
+  {id:'a47',nome:'Aila Maria Sousa',valor:180,dia:10,aniv:''},
+  {id:'a48',nome:'Emily Nascimento',valor:180,dia:12,aniv:''},
+  {id:'a49',nome:'Sandra Rocha',valor:170,dia:26,aniv:''},
+  {id:'a50',nome:'Josilena Moita',valor:180,dia:28,aniv:''},
+  {id:'a51',nome:'Raissa Beleboni',valor:180,dia:28,aniv:''},
+  {id:'a52',nome:'Itamara Moura',valor:150,dia:29,aniv:''},
+  {id:'a53',nome:'Daniella Rodrigues',valor:150,dia:29,aniv:''},
+  {id:'a54',nome:'Milvaneth Cardoso',valor:180,dia:16,aniv:''},
+  {id:'a55',nome:'Karynna Monteiro',valor:180,dia:19,aniv:'19/08'},
+  {id:'a56',nome:'Aldenilza',valor:150,dia:30,aniv:''},
+  {id:'a57',nome:'Germana Baró',valor:180,dia:14,aniv:''},
+  {id:'a58',nome:'Ilda Oliveira',valor:180,dia:29,aniv:''},
+  {id:'a59',nome:'Inaida Costa',valor:180,dia:23,aniv:''},
+  {id:'a60',nome:'Márcia Malcher',valor:180,dia:23,aniv:''},
+  {id:'a61',nome:'Maria Clara Bentes',valor:180,dia:27,aniv:''},
+  {id:'a62',nome:'Karini Pereira',valor:180,dia:28,aniv:''},
+  {id:'a63',nome:'Mira Pereira',valor:180,dia:28,aniv:''},
+  {id:'a64',nome:'Samara Oliveira',valor:180,dia:28,aniv:''},
+  {id:'a65',nome:'Dilair Vieira',valor:150,dia:30,aniv:''},
+  {id:'a66',nome:'Jamille Godinho',valor:145,dia:30,aniv:'28/06'},
+  {id:'a67',nome:'Luciane Budelon Albuquerque',valor:180,dia:11,aniv:'26/07'},
+  {id:'a68',nome:'Elen Orth',valor:180,dia:13,aniv:''},
+  {id:'a69',nome:'Irio Luiz Orth',valor:180,dia:13,aniv:''},
+  {id:'a70',nome:'Jorge de Figueiredo',valor:180,dia:12,aniv:''},
+  {id:'a71',nome:'Maíra de Figueiredo',valor:180,dia:12,aniv:''},
+  {id:'a72',nome:'Andressa Pires',valor:180,dia:13,aniv:'27/05'},
+  {id:'a73',nome:'Márcia Barbosa',valor:180,dia:13,aniv:''},
+  {id:'a74',nome:'Joice Mendonça',valor:180,dia:13,aniv:''}
+];
+
 // ── STORAGE ─────────────────────────────────────────────────
 const REMOTE_STORAGE = {
   enabled: true,
@@ -124,31 +241,113 @@ async function remoteLoad(k,d){
 async function loadRemoteState(){
   if(!REMOTE_STORAGE.enabled || !REMOTE_STORAGE.db) return;
   const [alunasData, pagamentosData, gastosData, presencasData] = await Promise.all([
-    remoteLoad('sg_alunas', []),
-    remoteLoad('sg_pags', []),
-    remoteLoad('sg_gastos', []),
-    remoteLoad('sg_presencas', {})
+    remoteLoad('sg_alunas', alunas),
+    remoteLoad('sg_pags', pagamentos),
+    remoteLoad('sg_gastos', gastos),
+    remoteLoad('sg_presencas', presencas)
   ]);
 
   if(alunasData.exists){ alunas = alunasData.value; saveLocal('sg_alunas', alunas); }
-  else { alunas = load('sg_alunas', []); }
-
   if(pagamentosData.exists){ pagamentos = pagamentosData.value; saveLocal('sg_pags', pagamentos); }
-  else { pagamentos = load('sg_pags', []); }
-
   if(gastosData.exists){ gastos = gastosData.value; saveLocal('sg_gastos', gastos); }
-  else { gastos = load('sg_gastos', []); }
-
   if(presencasData.exists){ presencas = presencasData.value; saveLocal('sg_presencas', presencas); }
-  else { presencas = load('sg_presencas', {}); }
 }
 
 initRemoteStorage();
 
-// Variáveis inicializadas vazias — serão preenchidas pelo Firebase no loadRemoteState
-let alunas = [];
-let pagamentos = [];
-let gastos = [];
+let alunas = load('sg_alunas', ALUNAS_INIT);
+
+// Init pagamentos com dados 2026
+let pagamentos = load('sg_pags', null);
+if(!pagamentos){
+  pagamentos = PAGS_2026.map((p,i)=>({id:'p'+i,...p}));
+  save('sg_pags', pagamentos);
+}
+
+const GASTOS_2026 = [
+  {id:'g1',desc:'Unimed',mes:0,ano:2026,valor:280},{id:'g2',desc:'Cartão Bradesco/carro',mes:0,ano:2026,valor:3280},
+  {id:'g3',desc:'Supermercado/feira',mes:0,ano:2026,valor:500},{id:'g4',desc:'Energia',mes:0,ano:2026,valor:345},
+  {id:'g5',desc:'Aniversário pai',mes:0,ano:2026,valor:280},{id:'g6',desc:'Roupa',mes:0,ano:2026,valor:360},
+  {id:'g7',desc:'Contador',mes:0,ano:2026,valor:420},{id:'g8',desc:'Internet',mes:0,ano:2026,valor:137},
+  {id:'g9',desc:'Maria',mes:0,ano:2026,valor:200},{id:'g10',desc:'Farmácia',mes:0,ano:2026,valor:100},
+  {id:'g11',desc:'Sítio/comida',mes:0,ano:2026,valor:180},{id:'g12',desc:'Academia',mes:0,ano:2026,valor:289},
+  {id:'g13',desc:'Combustível',mes:0,ano:2026,valor:50},{id:'g14',desc:'Spotify',mes:0,ano:2026,valor:50},
+  {id:'g15',desc:'Açaí',mes:0,ano:2026,valor:100},{id:'g16',desc:'Farmácia 2',mes:0,ano:2026,valor:60},
+  {id:'g17',desc:'Imposto Studio',mes:0,ano:2026,valor:445},{id:'g18',desc:'Supermercado',mes:0,ano:2026,valor:280},
+  {id:'g19',desc:'Combustível 2',mes:0,ano:2026,valor:100},{id:'g20',desc:'Farmácia 3',mes:0,ano:2026,valor:50},
+  {id:'g21',desc:'Lanche/bijú/presente',mes:0,ano:2026,valor:100},{id:'g22',desc:'Jantar',mes:0,ano:2026,valor:40},
+  {id:'g23',desc:'Urbano',mes:0,ano:2026,valor:40},{id:'g24',desc:'Unimed 2',mes:0,ano:2026,valor:244},
+  {id:'g25',desc:'Mês seguinte',mes:0,ano:2026,valor:180},
+  // FEVEREIRO
+  {id:'g26',desc:'Alex',mes:1,ano:2026,valor:250},{id:'g27',desc:'Unimed',mes:1,ano:2026,valor:280},
+  {id:'g28',desc:'Lanche',mes:1,ano:2026,valor:100},{id:'g29',desc:'Gás',mes:1,ano:2026,valor:90},
+  {id:'g30',desc:'Cartão/carro',mes:1,ano:2026,valor:2900},{id:'g31',desc:'Urbano Alex',mes:1,ano:2026,valor:190},
+  {id:'g32',desc:'Alex/combustível',mes:1,ano:2026,valor:300},{id:'g33',desc:'Comida semana',mes:1,ano:2026,valor:200},
+  {id:'g34',desc:'Supermercado',mes:1,ano:2026,valor:500},{id:'g35',desc:'Energia',mes:1,ano:2026,valor:305},
+  {id:'g36',desc:'Internet',mes:1,ano:2026,valor:137},{id:'g37',desc:'Carne/feira',mes:1,ano:2026,valor:250},
+  {id:'g38',desc:'Contador',mes:1,ano:2026,valor:420},{id:'g39',desc:'Presente Eduardo',mes:1,ano:2026,valor:30},
+  {id:'g40',desc:'Final de semana',mes:1,ano:2026,valor:150},{id:'g41',desc:'Spotify',mes:1,ano:2026,valor:40},
+  {id:'g42',desc:'Netflix',mes:1,ano:2026,valor:60},{id:'g43',desc:'Alex',mes:1,ano:2026,valor:100},
+  {id:'g44',desc:'Farmácia',mes:1,ano:2026,valor:70},{id:'g45',desc:'Patrocínio insta',mes:1,ano:2026,valor:50},
+  {id:'g46',desc:'Final de semana 2',mes:1,ano:2026,valor:100},{id:'g47',desc:'Dízimo',mes:1,ano:2026,valor:30},
+  {id:'g48',desc:'Maria',mes:1,ano:2026,valor:80},{id:'g49',desc:'Carne semana',mes:1,ano:2026,valor:180},
+  {id:'g50',desc:'Casa',mes:1,ano:2026,valor:80},{id:'g51',desc:'Roupa aniver. Ivete',mes:1,ano:2026,valor:50},
+  {id:'g52',desc:'Açaí',mes:1,ano:2026,valor:25},{id:'g53',desc:'Farmácia 2',mes:1,ano:2026,valor:30},
+  {id:'g54',desc:'Aniversário mãe',mes:1,ano:2026,valor:900},{id:'g55',desc:'Combustível',mes:1,ano:2026,valor:100},
+  {id:'g56',desc:'Alter',mes:1,ano:2026,valor:70},{id:'g57',desc:'Carne semana 2',mes:1,ano:2026,valor:100},
+  {id:'g58',desc:'Patrocínio insta 2',mes:1,ano:2026,valor:65},{id:'g59',desc:'Imposto',mes:1,ano:2026,valor:112},
+  {id:'g60',desc:'Para março',mes:1,ano:2026,valor:116},{id:'g61',desc:'Fev/março',mes:1,ano:2026,valor:145},
+  // MARÇO
+  {id:'g62',desc:'Unimed',mes:2,ano:2026,valor:281},{id:'g63',desc:'Imposto',mes:2,ano:2026,valor:340},
+  {id:'g64',desc:'Casa',mes:2,ano:2026,valor:100},{id:'g65',desc:'Super/dia da mulher/niver',mes:2,ano:2026,valor:500},
+  {id:'g66',desc:'Farmácia',mes:2,ano:2026,valor:68},{id:'g67',desc:'Urbano',mes:2,ano:2026,valor:40},
+  {id:'g68',desc:'Parcela aparelhos',mes:2,ano:2026,valor:2000},{id:'g69',desc:'Carro',mes:2,ano:2026,valor:2016},
+  {id:'g70',desc:'Energia',mes:2,ano:2026,valor:290},{id:'g71',desc:'Roupa dança',mes:2,ano:2026,valor:100},
+  {id:'g72',desc:'Carne semana',mes:2,ano:2026,valor:80},{id:'g73',desc:'Roupa/make/aniver',mes:2,ano:2026,valor:900},
+  {id:'g74',desc:'Internet',mes:2,ano:2026,valor:137},{id:'g75',desc:'Peixe',mes:2,ano:2026,valor:85},
+  {id:'g76',desc:'Vivo',mes:2,ano:2026,valor:58},{id:'g77',desc:'Meia',mes:2,ano:2026,valor:40},
+  {id:'g78',desc:'Combustível',mes:2,ano:2026,valor:100},{id:'g79',desc:'Farmácia 2',mes:2,ano:2026,valor:55},
+  {id:'g80',desc:'Supermercado/feira',mes:2,ano:2026,valor:510},{id:'g81',desc:'Contador',mes:2,ano:2026,valor:420},
+  {id:'g82',desc:'Unha/urbano',mes:2,ano:2026,valor:170},{id:'g83',desc:'Lanche/jantar',mes:2,ano:2026,valor:100},
+  {id:'g84',desc:'Alex',mes:2,ano:2026,valor:485},{id:'g85',desc:'Balança',mes:2,ano:2026,valor:80},
+  {id:'g86',desc:'Alex cartão',mes:2,ano:2026,valor:350},{id:'g87',desc:'Mercado do bairro',mes:2,ano:2026,valor:60},
+  {id:'g88',desc:'Carne',mes:2,ano:2026,valor:125},{id:'g89',desc:'Final de semana',mes:2,ano:2026,valor:130},
+  {id:'g90',desc:'Combustível 2',mes:2,ano:2026,valor:50},{id:'g91',desc:'Impostos',mes:2,ano:2026,valor:460},
+  {id:'g92',desc:'Aniversário',mes:2,ano:2026,valor:720},{id:'g93',desc:'Para abril',mes:2,ano:2026,valor:303},
+  // ABRIL
+  {id:'g94',desc:'Sítio',mes:3,ano:2026,valor:336},{id:'g95',desc:'Cartão de crédito/carro',mes:3,ano:2026,valor:2800},
+  {id:'g96',desc:'Urbano',mes:3,ano:2026,valor:300},{id:'g97',desc:'Ingresso',mes:3,ano:2026,valor:256},
+  {id:'g98',desc:'Energia',mes:3,ano:2026,valor:290},{id:'g99',desc:'Tia Monica',mes:3,ano:2026,valor:500},
+  {id:'g100',desc:'Pai',mes:3,ano:2026,valor:800},{id:'g101',desc:'Gás',mes:3,ano:2026,valor:100},
+  {id:'g102',desc:'Conta Vivo',mes:3,ano:2026,valor:58},{id:'g103',desc:'Pati. Cabelo',mes:3,ano:2026,valor:150},
+  {id:'g104',desc:'Avaliação academia',mes:3,ano:2026,valor:200},{id:'g105',desc:'Whey',mes:3,ano:2026,valor:115},
+  {id:'g106',desc:'Shirley calcinha',mes:3,ano:2026,valor:143},{id:'g107',desc:'Unha',mes:3,ano:2026,valor:150},
+  {id:'g108',desc:'Maria',mes:3,ano:2026,valor:20},{id:'g109',desc:'Farmácia',mes:3,ano:2026,valor:50},
+  {id:'g110',desc:'Maquiagem Josi',mes:3,ano:2026,valor:165},{id:'g111',desc:'Combustível Alex',mes:3,ano:2026,valor:70},
+  {id:'g112',desc:'Supermercado',mes:3,ano:2026,valor:419},{id:'g113',desc:'Cabelo/unha',mes:3,ano:2026,valor:260},
+  {id:'g114',desc:'Urbano 2',mes:3,ano:2026,valor:40},{id:'g115',desc:'Almoço',mes:3,ano:2026,valor:70},
+  {id:'g116',desc:'Jantar',mes:3,ano:2026,valor:65},{id:'g117',desc:'Internet',mes:3,ano:2026,valor:137},
+  {id:'g118',desc:'Roupa',mes:3,ano:2026,valor:95},{id:'g119',desc:'Spotify',mes:3,ano:2026,valor:41},
+  {id:'g120',desc:'Final de semana',mes:3,ano:2026,valor:240},{id:'g121',desc:'Lavanderia',mes:3,ano:2026,valor:40},
+  {id:'g122',desc:'Sushi',mes:3,ano:2026,valor:50},{id:'g123',desc:'Contador',mes:3,ano:2026,valor:420},
+  {id:'g124',desc:'Remédio',mes:3,ano:2026,valor:41},{id:'g125',desc:'Combustível',mes:3,ano:2026,valor:50},
+  {id:'g126',desc:'Feira',mes:3,ano:2026,valor:240},{id:'g127',desc:'Pai 2',mes:3,ano:2026,valor:360},
+  {id:'g128',desc:'Farmácia 2',mes:3,ano:2026,valor:40},{id:'g129',desc:'Mãe',mes:3,ano:2026,valor:25},
+  {id:'g130',desc:'Roupa 2',mes:3,ano:2026,valor:80},{id:'g131',desc:'Imposto Studio DAS',mes:3,ano:2026,valor:114},
+  {id:'g132',desc:'Central de ar',mes:3,ano:2026,valor:800},{id:'g133',desc:'Imposto',mes:3,ano:2026,valor:343},
+  {id:'g134',desc:'Farmácia 3',mes:3,ano:2026,valor:133},{id:'g135',desc:'Cadeiras',mes:3,ano:2026,valor:110},
+  {id:'g136',desc:'Casa',mes:3,ano:2026,valor:100},{id:'g137',desc:'Roupa 3',mes:3,ano:2026,valor:75},
+  {id:'g138',desc:'Maria',mes:3,ano:2026,valor:100},{id:'g139',desc:'Maio',mes:3,ano:2026,valor:429},
+  // MAIO
+  {id:'g140',desc:'Lavanderia',mes:4,ano:2026,valor:40},{id:'g141',desc:'Almoço',mes:4,ano:2026,valor:78},
+  {id:'g142',desc:'Unimed',mes:4,ano:2026,valor:281},{id:'g143',desc:'Cartão de crédito',mes:4,ano:2026,valor:2409},
+  {id:'g144',desc:'Combustível',mes:4,ano:2026,valor:100},{id:'g145',desc:'Parcela tia Monica',mes:4,ano:2026,valor:500},
+  {id:'g146',desc:'Aparelhos',mes:4,ano:2026,valor:400},{id:'g147',desc:'Imposto de Renda Alex',mes:4,ano:2026,valor:120},
+  {id:'g148',desc:'Dia das mães',mes:4,ano:2026,valor:369},{id:'g149',desc:'Endócrino',mes:4,ano:2026,valor:300},
+];
+
+let gastos = load('sg_gastos', null);
+if(!gastos){ gastos = GASTOS_2026; save('sg_gastos', gastos); }
 
 // ── STATE ────────────────────────────────────────────────────
 const hoje = new Date();
@@ -279,7 +478,7 @@ function presKey(id, hora) {
   return `pres_${id}_${d}_${hora}`;
 }
 
-let presencas = {};
+let presencas = load('sg_presencas', {});
 
 function togglePresenca(id, hora) {
   const k = presKey(id, hora);
