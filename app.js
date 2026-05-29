@@ -30,7 +30,7 @@ function initRemoteStorage(){
 }
 
 const AUTH = {
-  enabled: true,
+  enabled: false,
   provider: 'firebase'
 };
 let authInitialized = false;
@@ -44,12 +44,12 @@ function initAuth(){
       document.getElementById('login-overlay')?.classList.remove('open');
       document.getElementById('app').style.filter = '';
       document.getElementById('logout-btn')?.style.setProperty('display','inline-flex');
-      if(!authInitialized){
-        authInitialized = true;
-        await loadRemoteState().catch(()=>{});
-        renderHome();
-      }
+      // Sempre puxa dados frescos do Firebase ao autenticar (login ou reabertura do app)
+      authInitialized = true;
+      await loadRemoteState().catch(e=>console.warn('loadRemoteState falhou:', e));
+      renderHome();
     } else {
+      authInitialized = false;
       document.getElementById('logout-btn')?.style.setProperty('display','none');
       document.getElementById('app').style.filter = 'blur(3px)';
       document.getElementById('login-overlay')?.classList.add('open');
@@ -122,7 +122,17 @@ async function remoteLoad(k,d){
 }
 
 async function loadRemoteState(){
-  if(!REMOTE_STORAGE.enabled || !REMOTE_STORAGE.db) return;
+  // Se o banco não inicializou, tenta inicializar agora
+  if(!REMOTE_STORAGE.db) initRemoteStorage();
+  if(!REMOTE_STORAGE.enabled || !REMOTE_STORAGE.db){
+    console.warn('[Firebase] db não disponível — usando localStorage');
+    alunas    = load('sg_alunas', []);
+    pagamentos = load('sg_pags', []);
+    gastos    = load('sg_gastos', []);
+    presencas = load('sg_presencas', {});
+    return;
+  }
+  console.log('[Firebase] Carregando dados...');
   const [alunasData, pagamentosData, gastosData, presencasData] = await Promise.all([
     remoteLoad('sg_alunas', []),
     remoteLoad('sg_pags', []),
@@ -130,17 +140,18 @@ async function loadRemoteState(){
     remoteLoad('sg_presencas', {})
   ]);
 
-  if(alunasData.exists){ alunas = alunasData.value; saveLocal('sg_alunas', alunas); }
-  else { alunas = load('sg_alunas', []); }
+  if(alunasData.exists){ alunas = alunasData.value; saveLocal('sg_alunas', alunas); console.log('[Firebase] alunas:', alunas.length); }
+  else { alunas = load('sg_alunas', []); console.warn('[Firebase] sg_alunas não encontrado no banco'); }
 
-  if(pagamentosData.exists){ pagamentos = pagamentosData.value; saveLocal('sg_pags', pagamentos); }
-  else { pagamentos = load('sg_pags', []); }
+  if(pagamentosData.exists){ pagamentos = pagamentosData.value; saveLocal('sg_pags', pagamentos); console.log('[Firebase] pagamentos:', pagamentos.length); }
+  else { pagamentos = load('sg_pags', []); console.warn('[Firebase] sg_pags não encontrado no banco'); }
 
-  if(gastosData.exists){ gastos = gastosData.value; saveLocal('sg_gastos', gastos); }
-  else { gastos = load('sg_gastos', []); }
+  if(gastosData.exists){ gastos = gastosData.value; saveLocal('sg_gastos', gastos); console.log('[Firebase] gastos:', gastos.length); }
+  else { gastos = load('sg_gastos', []); console.warn('[Firebase] sg_gastos não encontrado no banco'); }
 
   if(presencasData.exists){ presencas = presencasData.value; saveLocal('sg_presencas', presencas); }
   else { presencas = load('sg_presencas', {}); }
+  console.log('[Firebase] Dados carregados com sucesso');
 }
 
 // Variáveis inicializadas vazias — serão preenchidas pelo Firebase no loadRemoteState
