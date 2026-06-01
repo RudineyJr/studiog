@@ -156,6 +156,9 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, BlinkMa
 /* ── MODAL ── */
 .overlay { display: none; position: fixed; inset: 0; background: rgba(26,16,20,0.7); z-index: 200; align-items: flex-end; }
 .overlay.open { display: flex; }
+.login-overlay { align-items: center; justify-content: center; padding: 12px; }
+.login-overlay .modal { max-width: 420px; width: 100%; border-radius: 24px; }
+.auth-error { min-height: 20px; color: var(--red); font-size: 13px; margin-bottom: 6px; }
 .modal {
   background: var(--white); border-radius: 20px 20px 0 0;
   padding: 8px 16px 24px; width: 100%; max-height: 90vh; overflow-y: auto;
