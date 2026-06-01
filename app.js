@@ -47,7 +47,12 @@ function save(k,v){saveLocal(k,v); if(REMOTE_STORAGE.enabled) remoteSave(k,v);}
 async function remoteLoad(k,d){
   if(!REMOTE_STORAGE.enabled || !REMOTE_STORAGE.db) return {exists:false,value:d};
   try{
-    const snap = await REMOTE_STORAGE.db.ref(`${REMOTE_STORAGE.rootPath}/${k}`).once('value');
+    const timeoutMs = 8000;
+    const loadPromise = REMOTE_STORAGE.db.ref(`${REMOTE_STORAGE.rootPath}/${k}`).once('value');
+    const snap = await Promise.race([
+      loadPromise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Firebase load timeout')), timeoutMs))
+    ]);
     if(!snap.exists()) return {exists:false,value:d};
     let value = snap.val();
     if(value && typeof value === 'object' && !Array.isArray(value)){
@@ -599,6 +604,8 @@ function renderAniv(){
 // ── INIT ─────────────────────────────────────────────────────
 // Aguarda DOM + SDKs do Firebase carregarem antes de inicializar
 window.addEventListener('DOMContentLoaded', () => {
+  initNav();
+  renderHome();
   initRemoteStorage();
   loadRemoteState().then(()=>renderHome()).catch(()=>renderHome());
 });
@@ -629,10 +636,10 @@ if ("serviceWorker" in navigator) {
 function showUpdateBanner(worker) {
   const banner = document.createElement("div");
   banner.id = "update-banner";
-  banner.innerHTML = \`
+  banner.innerHTML = `
     <span>Nova versão disponível</span>
     <button onclick="applyUpdate()">Atualizar</button>
-  \`;
+  `;
   document.body.appendChild(banner);
   window._pendingWorker = worker;
 }
