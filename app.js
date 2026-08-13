@@ -143,16 +143,23 @@ function escapeHtml(str){
 // Migrate pagamento entries that only have `nome` to include `alunaId` when possible
 function migratePayments(){
   if(!Array.isArray(pagamentos) || !Array.isArray(alunas)) return;
+  const total = pagamentos.length;
+  const beforeWithId = pagamentos.filter(p=>p.alunaId).length;
   let changed = false;
   const nameToId = {};
-  alunas.forEach(a=>{ nameToId[a.nome.trim().toLowerCase()] = a.id; });
+  alunas.forEach(a=>{ if(a && a.nome && a.id) nameToId[a.nome.trim().toLowerCase()] = a.id; });
   pagamentos.forEach(p=>{
     if(p.alunaId) return;
     const n = (p.nome||'').trim().toLowerCase();
     if(n && nameToId[n]){ p.alunaId = nameToId[n]; changed = true; }
   });
+  const afterWithId = pagamentos.filter(p=>p.alunaId).length;
+  const newlyMigrated = afterWithId - beforeWithId;
+  const withoutId = total - afterWithId;
+  const unmatchedSample = Array.from(new Set(pagamentos.filter(p=>!p.alunaId).map(p=>(p.nome||'').trim()).filter(Boolean))).slice(0,10);
+  console.log(`[MIGRATE] pagamentos total:${total} withId:${afterWithId} migrated:${newlyMigrated} withoutId:${withoutId}` + (unmatchedSample.length?` sample_unmatched:${JSON.stringify(unmatchedSample)}`:''));
   if(changed){
-    try{ save('sg_pags',pagamentos); console.log('[MIGRATE] pagamentos migrated to alunaId'); }catch(e){console.warn('[MIGRATE] failed to save migrated pagamentos',e); }
+    try{ save('sg_pags',pagamentos); }catch(e){console.warn('[MIGRATE] failed to save migrated pagamentos',e); }
   }
 }
 
