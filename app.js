@@ -397,7 +397,7 @@ function renderAlunas(){
 
 function showAluna(id){
   const a=alunas.find(x=>x.id===id);if(!a)return;
-  const hist=pagamentos.filter(p=>p.nome.trim()===a.nome.trim()).sort((x,y)=>y.ano-x.ano||y.mes-x.mes).slice(0,6);
+  const hist=pagamentos.filter(p=>p.alunaId===a.id).sort((x,y)=>y.ano-x.ano||y.mes-x.mes).slice(0,6);
   const agenda=[diasStr(a.dias),a.horario].filter(Boolean).join(' · ');
   document.getElementById('det-content').innerHTML=`
     <div style="text-align:center;padding:6px 0 16px;">
@@ -474,23 +474,23 @@ function renderMens(){
   document.getElementById('mens-mes-lbl').textContent=lbl(mes,ano);
   const q=(document.getElementById('search-mens')?.value||'').toLowerCase();
   const pagMes=pagamentos.filter(p=>p.mes===mes&&p.ano===ano);
-  const pagos=new Set(pagMes.map(p=>p.nome.trim()));
+  const pagos=new Set(pagMes.map(p=>p.alunaId));
   const lista=alunas.filter(a=>a.nome.toLowerCase().includes(q));
-  const pagas=lista.filter(a=>pagos.has(a.nome.trim())).length;
+  const pagas=lista.filter(a=>pagos.has(a.id)).length;
   const pend=lista.length-pagas;
-  const totRec=pagMes.filter(p=>lista.some(a=>a.nome.trim()===p.nome.trim())).reduce((s,p)=>s+p.valor,0);
+  const totRec=pagMes.filter(p=>lista.some(a=>a.id===p.alunaId)).reduce((s,p)=>s+p.valor,0);
   const esp=lista.reduce((s,a)=>s+a.valor,0);
   document.getElementById('m-pag').textContent=pagas;
   document.getElementById('m-pen').textContent=pend;
   document.getElementById('m-tot').textContent=fmt(totRec);
   document.getElementById('m-arec').textContent=fmt(Math.max(0,esp-totRec));
   const sorted=[...lista].sort((a,b)=>{
-    const pa=pagos.has(a.nome.trim()),pb=pagos.has(b.nome.trim());
+    const pa=pagos.has(a.id),pb=pagos.has(b.id);
     if(pa!==pb)return pa?1:-1;
     return a.dia-b.dia;
   });
   document.getElementById('mens-list').innerHTML=sorted.length?'<div class="card">'+sorted.map(a=>{
-    const ok=pagos.has(a.nome.trim());
+    const ok=pagos.has(a.id);
     return`<div class="row" onclick="togglePag('${a.id}',${mes},${ano})">
       <div class="avatar ${ok?'ok':''}">${inits(a.nome)}</div>
       <div class="row-info"><div class="row-name">${escapeHtml(a.nome)}</div><div class="row-sub">Dia ${a.dia} · ${fmt(a.valor)}</div></div>
@@ -501,10 +501,9 @@ function renderMens(){
 
 function togglePag(alunaId,mes,ano){
   const a=alunas.find(x=>x.id===alunaId);if(!a)return;
-  const nome=a.nome.trim();
-  const idx=pagamentos.findIndex(p=>p.nome.trim()===nome&&p.mes===mes&&p.ano===ano);
+  const idx=pagamentos.findIndex(p=>p.alunaId===alunaId&&p.mes===mes&&p.ano===ano);
   if(idx>=0)pagamentos.splice(idx,1);
-  else pagamentos.push({id:uid(),nome,mes,ano,valor:a.valor});
+  else pagamentos.push({id:uid(),alunaId, nome: a.nome.trim(), mes, ano, valor: a.valor});
   save('sg_pags',pagamentos);
   renderMens();
   if(state.screen==='home')renderHome();
@@ -517,8 +516,8 @@ function savePay(){
   const a=alunas.find(x=>x.id===alunaId);if(!a)return;
   const nome=a.nome.trim();
   const valor=parseFloat(document.getElementById('pay-valor').value)||a.valor;
-  if(!pagamentos.find(p=>p.nome.trim()===nome&&p.mes===mes&&p.ano===ano))
-    pagamentos.push({id:uid(),nome,mes,ano,valor});
+  if(!pagamentos.find(p=>p.alunaId===alunaId&&p.mes===mes&&p.ano===ano))
+    pagamentos.push({id:uid(),alunaId,nome,mes,ano,valor});
   save('sg_pags',pagamentos);
   closeModal('modal-pay');
   document.getElementById('pay-valor').value='';
