@@ -78,6 +78,8 @@ async function loadRemoteState(){
     console.warn('[Firebase] db não disponível — usando localStorage');
     alunas    = load('sg_alunas', []);
     pagamentos = load('sg_pags', []);
+    // migrate old pagamentos entries (which used to store nome instead of alunaId)
+    migratePayments();
     gastos    = load('sg_gastos', []);
     presencas = load('sg_presencas', {});
     return;
@@ -95,6 +97,9 @@ async function loadRemoteState(){
 
   if(pagamentosData.exists){ pagamentos = pagamentosData.value; saveLocal('sg_pags', pagamentos); console.log('[Firebase] pagamentos:', pagamentos.length); }
   else { pagamentos = load('sg_pags', []); console.warn('[Firebase] sg_pags não encontrado no banco'); }
+
+  // Attempt to migrate legacy pagamentos stored by name to use alunaId
+  migratePayments();
 
   if(gastosData.exists){ gastos = gastosData.value; saveLocal('sg_gastos', gastos); console.log('[Firebase] gastos:', gastos.length); }
   else { gastos = load('sg_gastos', []); console.warn('[Firebase] sg_gastos não encontrado no banco'); }
@@ -133,6 +138,22 @@ function escapeHtml(str){
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#39;');
+}
+
+// Migrate pagamento entries that only have `nome` to include `alunaId` when possible
+function migratePayments(){
+  if(!Array.isArray(pagamentos) || !Array.isArray(alunas)) return;
+  let changed = false;
+  const nameToId = {};
+  alunas.forEach(a=>{ nameToId[a.nome.trim().toLowerCase()] = a.id; });
+  pagamentos.forEach(p=>{
+    if(p.alunaId) return;
+    const n = (p.nome||'').trim().toLowerCase();
+    if(n && nameToId[n]){ p.alunaId = nameToId[n]; changed = true; }
+  });
+  if(changed){
+    try{ save('sg_pags',pagamentos); console.log('[MIGRATE] pagamentos migrated to alunaId'); }catch(e){console.warn('[MIGRATE] failed to save migrated pagamentos',e); }
+  }
 }
 
 // ── NAV ──────────────────────────────────────────────────────
@@ -564,10 +585,10 @@ function renderFinanceiro(){
   const sEl=document.getElementById('fin-sal');
   sEl.textContent=fmt(sal);
   sEl.className='metric-val '+(sal>=0?'green':'red');
-  // pagas/pendentes
-  const pagos=new Set(pagMes.map(p=>p.nome.trim()));
-  document.getElementById('fin-pag').textContent=alunas.filter(a=>pagos.has(a.nome.trim())).length;
-  document.getElementById('fin-pen').textContent=alunas.filter(a=>!pagos.has(a.nome.trim())).length;
+  // pagas/pendentes — use alunaId where available
+  const pagos=new Set(pagMes.map(p=>p.alunaId));
+  document.getElementById('fin-pag').textContent=alunas.filter(a=>pagos.has(a.id)).length;
+  document.getElementById('fin-pen').textContent=alunas.filter(a=>!pagos.has(a.id)).length;
   // gráfico
   const mths=[];
   for(let i=4;i>=0;i--){let m=mes-i,a=ano;if(m<0){m+=12;a--;}mths.push({m,a});}
