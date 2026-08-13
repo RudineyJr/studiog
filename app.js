@@ -353,8 +353,18 @@ function renderAulaCard(lista, hora, aoVivo) {
 setInterval(renderHome, 60000);
 
 function renderAnivHome(){
-  const mn=hoje.getMonth()+1;
-  const lista=alunas.filter(a=>{if(!a.aniv)return false;const p=a.aniv.split('/');return parseInt(p[1])===mn;}).sort((a,b)=>parseInt(a.aniv)-parseInt(b.aniv));
+  const mn = hoje.getMonth() + 1;
+  const todayDay = (new Date()).getDate();
+  const daysInMonth = new Date(hoje.getFullYear(), mn, 0).getDate();
+  const lista = alunas
+    .filter(a => { if(!a.aniv) return false; const p = a.aniv.split('/'); return parseInt(p[1]) === mn; })
+    .sort((a,b) => {
+      const da = parseInt(a.aniv.split('/')[0]) || 0;
+      const db = parseInt(b.aniv.split('/')[0]) || 0;
+      const na = (da - todayDay + daysInMonth) % daysInMonth;
+      const nb = (db - todayDay + daysInMonth) % daysInMonth;
+      return na - nb;
+    });
   const el=document.getElementById('aniv-home');
   if(!lista.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎂</div>Nenhum aniversariante este mês</div>';return;}
   el.innerHTML=lista.slice(0,5).map(a=>`<div class="aniv-row"><span style="font-size:22px">🎂</span><div class="row-info"><div class="row-name">${escapeHtml(a.nome)}</div><div class="row-sub">${a.aniv}</div></div></div>`).join('');
