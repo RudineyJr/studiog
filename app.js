@@ -525,25 +525,13 @@ function savePay(){
 }
 
 // ── GASTOS ───────────────────────────────────────────────────
-function renderGastos(){
-  const{mes,ano}=state.gastos;
-  document.getElementById('gastos-mes-lbl').textContent=lbl(mes,ano);
-  const gm=gastos.filter(g=>g.mes===mes&&g.ano===ano);
-  document.getElementById('gastos-total').textContent=fmt(gm.reduce((s,g)=>s+g.valor,0));
-  document.getElementById('gastos-list').innerHTML=gm.length?'<div class="card">'+gm.map(g=>`
-    <div class="row" style="cursor:default;">
-      <div class="avatar" style="background:var(--red-light);color:var(--red-dark);font-family:inherit;font-size:10px;font-weight:800;">R$</div>
-      <div class="row-info"><div class="row-name">${g.desc}</div></div>
-      <div class="row-right" style="display:flex;align-items:center;gap:8px;">
-        <div class="row-val red">${fmt(g.valor)}</div>
-        <button class="del-btn" onclick="removeGasto('${g.id}')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-        </button>
-      </div>
-    </div>`).join('')+'</div>':'<div class="empty"><div class="empty-icon">💸</div>Nenhum gasto registrado</div>';
+function removeGasto(id){
+  gastos=gastos.filter(g=>g.id!==id);
+  save('sg_gastos',gastos);
+  // gastos screen removed; refresh financeiro and home views instead
+  renderFinanceiro();
+  renderHome();
 }
-
-function removeGasto(id){gastos=gastos.filter(g=>g.id!==id);save('sg_gastos',gastos);renderGastos();renderHome();}
 
 function saveGasto(){
   const desc=document.getElementById('g-desc').value.trim();
