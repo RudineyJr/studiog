@@ -188,6 +188,11 @@ function openAdd(){
     if(title) title.textContent = 'Cadastrar aluna';
     const button = document.querySelector('#modal-aluna .btn-red');
     if(button) button.textContent = 'Cadastrar aluna';
+    // Clear form fields for new registration
+    const fields = ['a-nome','a-valor','a-dia','a-aniv'];
+    fields.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    const horarioEl = document.getElementById('a-horario'); if(horarioEl) horarioEl.value = '';
+    document.querySelectorAll('#dias-semana-picker .dia-pill').forEach(b=>b.classList.remove('sel'));
     openModal('modal-aluna');
     return;
   }
