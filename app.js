@@ -78,8 +78,9 @@ async function loadRemoteState(){
     console.warn('[Firebase] db não disponível — usando localStorage');
     alunas    = load('sg_alunas', []);
     pagamentos = load('sg_pags', []);
-    // migrate old pagamentos entries (which used to store nome instead of alunaId)
-    migratePayments();
+      // migrate old pagamentos entries (which used to store nome instead of alunaId)
+      console.log('[MIGRATE] calling migratePayments() from local fallback');
+      migratePayments();
     gastos    = load('sg_gastos', []);
     presencas = load('sg_presencas', {});
     return;
@@ -99,6 +100,7 @@ async function loadRemoteState(){
   else { pagamentos = load('sg_pags', []); console.warn('[Firebase] sg_pags não encontrado no banco'); }
 
   // Attempt to migrate legacy pagamentos stored by name to use alunaId
+  console.log('[MIGRATE] calling migratePayments() after remote load');
   migratePayments();
 
   if(gastosData.exists){ gastos = gastosData.value; saveLocal('sg_gastos', gastos); console.log('[Firebase] gastos:', gastos.length); }
