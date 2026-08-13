@@ -22,7 +22,10 @@ function initRemoteStorage(){
   if(!REMOTE_STORAGE.enabled) return;
   if(typeof firebase === 'undefined'){ console.warn('Firebase SDK is not loaded. Remote storage disabled.'); return; }
   try{
-    firebase.initializeApp(REMOTE_STORAGE.firebaseConfig);
+    // Initialize Firebase app only once to avoid "already exists" errors
+    if(!firebase.apps || firebase.apps.length === 0){
+      firebase.initializeApp(REMOTE_STORAGE.firebaseConfig);
+    }
     REMOTE_STORAGE.db = firebase.database();
   }catch(e){
     console.warn('Remote storage initialization failed:', e);
@@ -123,6 +126,14 @@ function fmt(v){return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDi
 function inits(n){const p=n.trim().split(' ');return(p[0][0]+(p[1]?.[0]||'')).toUpperCase();}
 function uid(){return '_'+Math.random().toString(36).slice(2);}
 function lbl(m,a){return ML[m]+' '+a;}
+function escapeHtml(str){
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
 
 // ── NAV ──────────────────────────────────────────────────────
 let navBtns = [];
@@ -188,7 +199,7 @@ function openAdd(){
   document.getElementById('pay-mes').value=state.mens.mes;
   document.getElementById('pay-ano').value=state.mens.ano;
   const sel=document.getElementById('pay-aluna');
-  sel.innerHTML=[...alunas].sort((a,b)=>a.nome.localeCompare(b.nome)).map(a=>`<option value="${a.id}">${a.nome}</option>`).join('');
+  sel.innerHTML=[...alunas].sort((a,b)=>a.nome.localeCompare(b.nome)).map(a=>`<option value="${a.id}">${escapeHtml(a.nome)}</option>`).join('');
   openModal('modal-pay');
 }
 
@@ -200,7 +211,8 @@ const GRADE = {
 };
 
 function horariosHoje() {
-  const diaSem = hoje.getDay(); // 0-6
+  // Use current date so the UI reflects day changes without reload
+  const diaSem = (new Date()).getDay(); // 0-6
   return (GRADE[diaSem] || []);
 }
 
@@ -231,7 +243,7 @@ function alunasDoHorario(hora) {
 
 // presença: chave "id-YYYY-MM-DD-HH"
 function presKey(id, hora) {
-  const d = hoje.toISOString().slice(0,10);
+  const d = (new Date()).toISOString().slice(0,10);
   return `pres_${id}_${d}_${hora}`;
 }
 
@@ -330,7 +342,7 @@ function renderAulaCard(lista, hora, aoVivo) {
               ${inits(a.nome)}
               ${pres ? `<div class="av-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>` : ''}
             </div>
-            <div class="av-name">${a.nome.split(' ')[0]}</div>
+            <div class="av-name">${escapeHtml(a.nome.split(' ')[0]||'')}</div>
           </div>`;
         }).join('')}</div>`
     }
@@ -345,7 +357,7 @@ function renderAnivHome(){
   const lista=alunas.filter(a=>{if(!a.aniv)return false;const p=a.aniv.split('/');return parseInt(p[1])===mn;}).sort((a,b)=>parseInt(a.aniv)-parseInt(b.aniv));
   const el=document.getElementById('aniv-home');
   if(!lista.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎂</div>Nenhum aniversariante este mês</div>';return;}
-  el.innerHTML=lista.slice(0,5).map(a=>`<div class="aniv-row"><span style="font-size:22px">🎂</span><div class="row-info"><div class="row-name">${a.nome}</div><div class="row-sub">${a.aniv}</div></div></div>`).join('');
+  el.innerHTML=lista.slice(0,5).map(a=>`<div class="aniv-row"><span style="font-size:22px">🎂</span><div class="row-info"><div class="row-name">${escapeHtml(a.nome)}</div><div class="row-sub">${a.aniv}</div></div></div>`).join('');
 }
 
 const DIAS_NOME = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -362,7 +374,7 @@ function renderAlunas(){
     const sub=agenda||(a.aniv?'🎂 '+a.aniv:'Dia '+a.dia);
     return`<div class="row" onclick="showAluna('${a.id}')">
       <div class="avatar">${inits(a.nome)}</div>
-      <div class="row-info"><div class="row-name">${a.nome}</div><div class="row-sub">${sub}</div></div>
+      <div class="row-info"><div class="row-name">${escapeHtml(a.nome)}</div><div class="row-sub">${sub}</div></div>
       <div class="row-right"><div class="row-val">${fmt(a.valor)}</div></div>
     </div>`;
   }).join('')+'</div>';
@@ -374,8 +386,8 @@ function showAluna(id){
   const agenda=[diasStr(a.dias),a.horario].filter(Boolean).join(' · ');
   document.getElementById('det-content').innerHTML=`
     <div style="text-align:center;padding:6px 0 16px;">
-      <div class="aluna-avatar-big">${inits(a.nome)}</div>
-      <div style="font-size:18px;font-weight:800;margin-bottom:3px;">${a.nome}</div>
+    <div class="aluna-avatar-big">${inits(a.nome)}</div>
+    <div style="font-size:18px;font-weight:800;margin-bottom:3px;">${escapeHtml(a.nome)}</div>
       <div style="color:var(--text2);font-size:13px;">${fmt(a.valor)}/mês · Vence dia ${a.dia}</div>
       ${agenda?`<div style="margin-top:5px;font-size:12px;color:var(--red);font-weight:700;">📅 ${agenda}</div>`:''}
     </div>
@@ -466,7 +478,7 @@ function renderMens(){
     const ok=pagos.has(a.nome.trim());
     return`<div class="row" onclick="togglePag('${a.id}',${mes},${ano})">
       <div class="avatar ${ok?'ok':''}">${inits(a.nome)}</div>
-      <div class="row-info"><div class="row-name">${a.nome}</div><div class="row-sub">Dia ${a.dia} · ${fmt(a.valor)}</div></div>
+      <div class="row-info"><div class="row-name">${escapeHtml(a.nome)}</div><div class="row-sub">Dia ${a.dia} · ${fmt(a.valor)}</div></div>
       <div class="row-right"><span class="badge ${ok?'pago':'pendente'}">${ok?'✓ Pago':'Pendente'}</span></div>
     </div>`;
   }).join('')+'</div>':'<div class="empty"><div class="empty-icon">🔍</div>Nenhuma aluna encontrada</div>';
@@ -596,7 +608,7 @@ function renderAniv(){
   el.innerHTML='<div class="card">'+lista.map(a=>`
     <div class="aniv-row">
       <span style="font-size:24px">🎂</span>
-      <div class="row-info"><div class="row-name">${a.nome}</div><div class="row-sub">${a.aniv}</div></div>
+      <div class="row-info"><div class="row-name">${escapeHtml(a.nome)}</div><div class="row-sub">${a.aniv}</div></div>
       <span class="badge hoje">Dia ${a.aniv.split('/')[0]}</span>
     </div>`).join('')+'</div>';
 }
