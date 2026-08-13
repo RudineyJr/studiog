@@ -592,10 +592,20 @@ function renderFinanceiro(){
   const sEl=document.getElementById('fin-sal');
   sEl.textContent=fmt(sal);
   sEl.className='metric-val '+(sal>=0?'green':'red');
-  // pagas/pendentes — use alunaId where available
-  const pagos=new Set(pagMes.map(p=>p.alunaId));
-  document.getElementById('fin-pag').textContent=alunas.filter(a=>pagos.has(a.id)).length;
-  document.getElementById('fin-pen').textContent=alunas.filter(a=>!pagos.has(a.id)).length;
+  // pagas/pendentes — prefer alunaId, fallback to nome matching
+  try{
+    console.log('[FINANCE] filtering pagamentos for',mes,ano,'found',pagMes.length);
+    console.log('[FINANCE] sample pagamentos:',pagMes.slice(0,5));
+  }catch(e){}
+  const nameToId = {};
+  alunas.forEach(a=>{ if(a && a.nome && a.id) nameToId[a.nome.trim().toLowerCase()] = a.id; });
+  const pagos = new Set();
+  pagMes.forEach(p=>{
+    if(p.alunaId) pagos.add(p.alunaId);
+    else if(p.nome){ const id = nameToId[(p.nome||'').trim().toLowerCase()]; if(id) pagos.add(id); }
+  });
+  document.getElementById('fin-pag').textContent = alunas.filter(a=>pagos.has(a.id)).length;
+  document.getElementById('fin-pen').textContent = alunas.filter(a=>!pagos.has(a.id)).length;
   // gráfico
   const mths=[];
   for(let i=4;i>=0;i--){let m=mes-i,a=ano;if(m<0){m+=12;a--;}mths.push({m,a});}
