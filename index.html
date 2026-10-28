@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Studio G</title>
+
+<meta name="theme-color" content="#E8192C">
+
+<link rel="manifest" href="manifest.json">
+<!-- Inline SVG favicon to avoid /favicon.ico 404 during local testing -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23E8192C%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%2268%22%20font-size%3D%2264%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%22%20font-weight%3D%22700%22%20fill%3D%22%23fff%22%3Eg%3C%2Ftext%3E%3C%2Fsvg%3E">
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<link rel="stylesheet" href="style.css">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+</head>
+<body>
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo-wrap">
+      <div class="logo-g">g</div>
+      <div class="logo-text">
+        <div class="logo-studio">Studio G</div>
+        <div class="logo-sub">Pilates</div>
+      </div>
+    </div>
+    <button class="topbar-action" onclick="openAdd()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Novo
+    </button>
+    <button class="topbar-action" id="logout-btn" onclick="logout()" style="display:none; margin-left:8px;">Sair</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- HOME -->
+    <div class="screen active" id="screen-home">
+      <!-- Cabeçalho com hora atual -->
+      <div class="aula-header">
+        <div>
+          <div class="aula-hora-label">Agora</div>
+          <div class="aula-hora-val" id="relogio">--:--</div>
+          <div class="aula-data" id="data-hoje"></div>
+        </div>
+        <div style="text-align:right;">
+          <div class="aula-hora-label">Próxima aula</div>
+          <div class="prox-hora" id="prox-hora-label">--</div>
+        </div>
+      </div>
+
+      <!-- Aula atual -->
+      <div id="aula-atual-sec">
+        <div class="sec-title" id="aula-atual-title">Aula atual</div>
+        <div id="aula-atual-list"></div>
+      </div>
+
+      <!-- Próxima aula -->
+      <div id="prox-aula-sec">
+        <div class="sec-title" id="prox-aula-title">Próxima aula</div>
+        <div id="prox-aula-list"></div>
+      </div>
+
+      <!-- Aniversariantes -->
+      <div class="sec-title">Aniversariantes do mês</div>
+      <div id="aniv-home" class="card"></div>
+    </div>
+
+    <!-- ALUNAS -->
+    <div class="screen" id="screen-alunas">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar aluna..." id="search-alunas" oninput="renderAlunas()" />
+      </div>
+      <div id="alunas-list"></div>
+    </div>
+
+    <!-- MENSALIDADES -->
+    <div class="screen" id="screen-mens">
+      <div class="month-sel">
+        <button class="month-btn" onclick="chMonth('mens',-1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <span class="month-label" id="mens-mes-lbl">Maio 2026</span>
+        <button class="month-btn" onclick="chMonth('mens',1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="metric-grid">
+        <div class="metric"><div class="metric-label">Pagas</div><div class="metric-val green" id="m-pag">0</div></div>
+        <div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val red" id="m-pen">0</div></div>
+        <div class="metric"><div class="metric-label">Total recebido</div><div class="metric-val green" id="m-tot">R$ 0</div></div>
+        <div class="metric"><div class="metric-label">A receber</div><div class="metric-val amber" id="m-arec">R$ 0</div></div>
+      </div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar aluna..." id="search-mens" oninput="renderMens()" />
+      </div>
+      <div id="mens-list"></div>
+    </div>
+
+    <!-- FINANCEIRO -->
+    <div class="screen" id="screen-financeiro">
+      <div class="month-sel">
+        <button class="month-btn" onclick="chMonth('fin',-1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <span class="month-label" id="fin-mes-lbl">Maio 2026</span>
+        <button class="month-btn" onclick="chMonth('fin',1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <!-- Resumo do mês -->
+      <div class="metric-grid">
+        <div class="metric"><div class="metric-label">Recebido</div><div class="metric-val green" id="fin-rec">R$ 0</div></div>
+        <div class="metric"><div class="metric-label">A receber</div><div class="metric-val amber" id="fin-arec">R$ 0</div></div>
+        <div class="metric"><div class="metric-label">Gastos</div><div class="metric-val red" id="fin-gas">R$ 0</div></div>
+        <div class="metric"><div class="metric-label">Saldo</div><div class="metric-val" id="fin-sal">R$ 0</div></div>
+      </div>
+      <!-- Gráfico -->
+      <div class="sec-title">Histórico</div>
+      <div class="card">
+        <div class="chart-wrap">
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Recebido</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--black2)"></div>Gastos</div>
+          </div>
+          <div class="bars" id="fin-bar-chart"></div>
+        </div>
+      </div>
+      <!-- Mensalidades do mês -->
+      <div class="sec-title">Mensalidades</div>
+      <div class="metric-grid" style="margin-bottom:8px;">
+        <div class="metric"><div class="metric-label">Pagas</div><div class="metric-val green" id="fin-pag">0</div></div>
+        <div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val red" id="fin-pen">0</div></div>
+      </div>
+      <!-- Gastos do mês -->
+      <div class="sec-title">Gastos do mês</div>
+      <div id="fin-gastos-list"></div>
+    </div>
+
+    <!-- ANIVERSARIANTES -->
+    <div class="screen" id="screen-aniv">
+      <div class="month-sel">
+        <button class="month-btn" onclick="chMonth('aniv',-1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <span class="month-label" id="aniv-mes-lbl">Maio 2026</span>
+        <button class="month-btn" onclick="chMonth('aniv',1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div id="aniv-list"></div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="goScreen('home',0)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Início
+    </button>
+    <button class="nav-btn" onclick="goScreen('alunas',1)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Alunas
+    </button>
+    <button class="nav-btn" onclick="goScreen('mens',2)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Mensalidades
+    </button>
+    <button class="nav-btn" onclick="goScreen('financeiro',3)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      Financeiro
+    </button>
+    <button class="nav-btn" onclick="goScreen('aniv',4)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Aniv.
+    </button>
+  </nav>
+</div>
+
+<!-- MODAL: Pagamento -->
+<div class="overlay" id="modal-pay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Registrar pagamento</div>
+    <div class="form-group">
+      <label class="form-label">Aluna</label>
+      <select class="form-input" id="pay-aluna"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Mês</label>
+        <select class="form-input" id="pay-mes">
+          <option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option>
+          <option value="3">Abril</option><option value="4" selected>Maio</option><option value="5">Junho</option>
+          <option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option>
+          <option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ano</label>
+        <input class="form-input" type="number" id="pay-ano" value="2026" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Valor (R$)</label>
+      <input class="form-input" type="number" id="pay-valor" placeholder="180" inputmode="decimal" />
+    </div>
+    <button class="btn-red" onclick="savePay()">Confirmar pagamento</button>
+    <button class="btn-cancel" onclick="closeModal('modal-pay')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL: Gasto -->
+<div class="overlay" id="modal-gasto">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Registrar gasto</div>
+    <div class="form-group">
+      <label class="form-label">Descrição</label>
+      <input class="form-input" type="text" id="g-desc" placeholder="Ex: Aluguel, Energia..." />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Mês</label>
+        <select class="form-input" id="g-mes">
+          <option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option>
+          <option value="3">Abril</option><option value="4" selected>Maio</option><option value="5">Junho</option>
+          <option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option>
+          <option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ano</label>
+        <input class="form-input" type="number" id="g-ano" value="2026" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Valor (R$)</label>
+      <input class="form-input" type="number" id="g-valor" placeholder="0" inputmode="decimal" />
+    </div>
+    <button class="btn-red" onclick="saveGasto()">Salvar gasto</button>
+    <button class="btn-cancel" onclick="closeModal('modal-gasto')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL: Nova aluna -->
+<div class="overlay" id="modal-aluna">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Cadastrar aluna</div>
+    <div class="form-group">
+      <label class="form-label">Nome completo</label>
+      <input class="form-input" type="text" id="a-nome" placeholder="Nome da aluna" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Mensalidade (R$)</label>
+        <input class="form-input" type="number" id="a-valor" placeholder="180" inputmode="decimal" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Dia vencimento</label>
+        <input class="form-input" type="number" id="a-dia" placeholder="1" min="1" max="31" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Dias da semana</label>
+      <div id="dias-semana-picker" style="display:flex;flex-wrap:wrap;gap:6px;">
+        <button type="button" class="dia-pill" data-dia="1" onclick="toggleDia(this)">Seg</button>
+        <button type="button" class="dia-pill" data-dia="2" onclick="toggleDia(this)">Ter</button>
+        <button type="button" class="dia-pill" data-dia="3" onclick="toggleDia(this)">Qua</button>
+        <button type="button" class="dia-pill" data-dia="4" onclick="toggleDia(this)">Qui</button>
+        <button type="button" class="dia-pill" data-dia="5" onclick="toggleDia(this)">Sex</button>
+        <button type="button" class="dia-pill" data-dia="6" onclick="toggleDia(this)">Sáb</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Horário da aula</label>
+      <select class="form-input" id="a-horario">
+        <option value="">Selecione o horário</option>
+        <option value="08:00">08:00</option>
+        <option value="09:00">09:00</option>
+        <option value="10:00">10:00</option>
+        <option value="11:00">11:00</option>
+        <option value="12:00">12:00</option>
+        <option value="13:00">13:00</option>
+        <option value="14:00">14:00</option>
+        <option value="15:00">15:00</option>
+        <option value="16:00">16:00</option>
+        <option value="17:00">17:00</option>
+        <option value="18:00">18:00</option>
+        <option value="19:00">19:00</option>
+        <option value="20:00">20:00</option>
+        <option value="21:00">21:00</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Aniversário (DD/MM)</label>
+      <input class="form-input" type="text" id="a-aniv" placeholder="Ex: 15/06" />
+    </div>
+    <button class="btn-red" onclick="saveAluna()">Cadastrar aluna</button>
+    <button class="btn-cancel" onclick="closeModal('modal-aluna')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL: Detalhe aluna -->
+<div class="overlay" id="modal-det">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="det-content"></div>
+    <button class="btn-cancel" onclick="closeModal('modal-det')">Fechar</button>
+  </div>
+</div>
+
+
+
+ <script src="app.js"></script>
+</body>
+</html>
