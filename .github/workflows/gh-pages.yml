@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ v2.0 ]
 
 jobs:
   deploy:
@@ -16,19 +16,14 @@ jobs:
         with:
           persist-credentials: true
 
-      - name: Debug Git environment
+      - name: Prepare published app
         run: |
-          git remote -v
-          git branch --show-current
-          git status --short
+          mkdir -p ./public
+          cp index.html app.js style.css sw.js manifest.json icon-192.png icon-512.png ./public/
+          echo "${{ github.sha }}" > ./public/deployed_commit.txt
 
-      - name: Prepare published folder and write deployed commit SHA
-        run: |
-          mkdir -p ./www
-          echo "${{ github.sha }}" > ./www/deployed_commit.txt
-
-      - name: Deploy `www/` to GitHub Pages
+      - name: Deploy app to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./www
+          publish_dir: ./public
