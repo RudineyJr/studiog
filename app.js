@@ -504,12 +504,21 @@ function renderMens(){
   document.getElementById('mens-mes-lbl').textContent=lbl(mes,ano);
   const q=(document.getElementById('search-mens')?.value||'').toLowerCase();
   const pagMes=pagamentos.filter(p=>p.mes===mes&&p.ano===ano);
-  const pagos=new Set(pagMes.map(p=>p.alunaId));
+  const nameToId={};
+  alunas.forEach(a=>{if(a&&a.nome&&a.id)nameToId[a.nome.trim().toLowerCase()]=a.id;});
+  const pagos=new Set();
+  pagMes.forEach(p=>{
+    if(p.alunaId)pagos.add(p.alunaId);
+    else if(p.nome){
+      const id=nameToId[p.nome.trim().toLowerCase()];
+      if(id)pagos.add(id);
+    }
+  });
   const lista=alunas.filter(a=>a.nome.toLowerCase().includes(q));
-  const pagas=lista.filter(a=>pagos.has(a.id)).length;
-  const pend=lista.length-pagas;
-  const totRec=pagMes.filter(p=>lista.some(a=>a.id===p.alunaId)).reduce((s,p)=>s+p.valor,0);
-  const esp=lista.reduce((s,a)=>s+a.valor,0);
+  const pagas=alunas.filter(a=>pagos.has(a.id)).length;
+  const pend=alunas.length-pagas;
+  const totRec=pagMes.reduce((s,p)=>s+(Number(p.valor)||0),0);
+  const esp=alunas.reduce((s,a)=>s+(Number(a.valor)||0),0);
   document.getElementById('m-pag').textContent=pagas;
   document.getElementById('m-pen').textContent=pend;
   document.getElementById('m-tot').textContent=fmt(totRec);
@@ -583,10 +592,10 @@ function renderFinanceiro(){
   const{mes,ano}=state.fin;
   document.getElementById('fin-mes-lbl').textContent=lbl(mes,ano);
   const pagMes=pagamentos.filter(p=>p.mes===mes&&p.ano===ano);
-  const rec=pagMes.reduce((s,p)=>s+p.valor,0);
-  const esp=alunas.reduce((s,a)=>s+a.valor,0);
+  const rec=pagMes.reduce((s,p)=>s+(Number(p.valor)||0),0);
+  const esp=alunas.reduce((s,a)=>s+(Number(a.valor)||0),0);
   const gasMes=gastos.filter(g=>g.mes===mes&&g.ano===ano);
-  const totalGas=gasMes.reduce((s,g)=>s+g.valor,0);
+  const totalGas=gasMes.reduce((s,g)=>s+(Number(g.valor)||0),0);
   const sal=rec-totalGas;
   document.getElementById('fin-rec').textContent=fmt(rec);
   document.getElementById('fin-arec').textContent=fmt(Math.max(0,esp-rec));
@@ -613,8 +622,8 @@ function renderFinanceiro(){
   for(let i=4;i>=0;i--){let m=mes-i,a=ano;if(m<0){m+=12;a--;}mths.push({m,a});}
   const data=mths.map(({m,a})=>({
     lb:ML[m].slice(0,3),
-    r:pagamentos.filter(p=>p.mes===m&&p.ano===a).reduce((s,p)=>s+p.valor,0),
-    g:gastos.filter(p=>p.mes===m&&p.ano===a).reduce((s,p)=>s+p.valor,0)
+    r:pagamentos.filter(p=>p.mes===m&&p.ano===a).reduce((s,p)=>s+(Number(p.valor)||0),0),
+    g:gastos.filter(p=>p.mes===m&&p.ano===a).reduce((s,p)=>s+(Number(p.valor)||0),0)
   }));
   const mx=Math.max(...data.flatMap(d=>[d.r,d.g]),1);
   document.getElementById('fin-bar-chart').innerHTML=data.map(d=>`
